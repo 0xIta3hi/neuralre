@@ -68,4 +68,4 @@ python cli.py analyze suspicious.exe --mode obfuscation --all-functions
 python cli.py analyze challenge.bin --function sym.decrypt_payload --mode explain
 ```
 
-_Developed by [Your Name] for the security research community._
+_Developed by [0xIta3hi] for the security research community._
