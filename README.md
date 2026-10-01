@@ -1,71 +1,180 @@
-# NeuralRE 🧠🔍
+# NeuralRE
 
-### _AI-Powered Binary Analysis for Security Researchers_
+AI-assisted reverse engineering for binary analysis using radare2 and local large language models.
 
-NeuralRE is a specialized automation framework that bridges the gap between traditional static analysis and Large Language Models (LLMs). By leveraging **radare2** for deep binary inspection and **Local LLMs** for contextual reasoning, NeuralRE automates the most time-consuming parts of reverse engineering: function summarization, obfuscation detection, and vulnerability triaging.
+## Overview
 
-## 🚀 The Core Innovation
+NeuralRE is a lightweight reverse engineering workflow that combines static analysis with language-model reasoning to help security researchers triage unfamiliar binaries. The project extracts function metadata and disassembly from a binary, structures the result into prompt-ready context, and submits it to a locally hosted model for analysis.
 
-Traditional reverse engineering requires hours of manual stack analysis and control-flow tracing. NeuralRE introduces an "AI-Augmented Triage" layer. It extracts assembly context via `r2pipe`, normalizes it into Jinja2-structured prompts, and uses local inference (Ollama) to provide a "human-readable" blueprint of unknown binaries.
+This is designed to support common reverse engineering tasks such as:
 
-## ✨ Key Features
+- function summarization
+- behavioral interpretation of assembly
+- heuristic detection of obfuscation patterns
+- vulnerability-oriented review of suspicious code paths
+- quick triage of binaries before deeper manual investigation
 
-- **📊 Context-Aware Function Analysis:** Goes beyond simple disassembly to explain the _logic_ of a function (e.g., "This is a custom base64 decoder with a non-standard alphabet").
-    
-- **🔒 Heuristic Obfuscation Detection:** Specifically tuned to identify XOR-decryption loops, anti-debugging tricks, and string-stacking techniques common in malware.
-    
-- **🚨 Automated Vulnerability Scanning:** Scans for high-risk syscalls and unsafe C library usage (e.g., `gets`, `strcpy`, `printf` format string vulnerabilities) with AI-ranked confidence scores.
-    
-- **📝 Automated Reporting:** Generates structured JSON or Markdown reports for documentation during CTFs or malware incidents.
-    
+## Why this project exists
 
-## 🏗️ Technical Architecture
+Traditional RE workflows are often slow and manual, especially when analysts must inspect large binaries by hand. NeuralRE sits between the binary analysis layer and the reasoning layer: radare2 provides disassembly and metadata, while a local model helps interpret the extracted context in a more readable and actionable way.
 
-```
-┌─────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-│   radare2 Core  │      │ Logic Engine     │      │ Local LLM        │
-│   (via r2pipe)  │────▶ │ (Python/Jinja2)  │────▶ │ (Ollama/Llama3)  │
-└─────────────────┘      └──────────────────┘      └──────────────────┘
-        │                         │                         │
-  - Disassembly             - Prompt Template         - Behavioral Anal.
-  - String Extraction       - Context Trimming        - Vuln Detection
-  - CFG Mapping             - JSON Formatting         - Summarization
-```
+## Architecture
 
-## 🛠️ Security & Privacy Analysis (Critical for Researchers)
+The project is intentionally simple and modular:
 
-Unlike web-based AI tools, NeuralRE is designed for **privacy-first analysis**:
+- radare2 for binary analysis and disassembly
+- r2pipe for Python integration
+- Jinja-based prompt templates for structured analysis prompts
+- Ollama for local inference
+- optional Streamlit interface for interactive use
 
-1. **Air-Gapped Operation:** Supports 100% local inference via Ollama. No binary metadata or proprietary code ever leaves your machine.
-    
-2. **Prompt Engineering Security:** Implements strict system prompts to prevent LLM "hallucinations" regarding assembly instructions.
-    
-3. **Data Truncation:** Automatically handles large binaries by chunking function data, ensuring the LLM context window isn't overwhelmed.
-    
-
-## 🎯 Implementation Details
-
-- **Disassembly Engine:** Radare2 (The industry-standard open-source RE framework).
-    
-- **Communication Layer:** `r2pipe` provides the Python bridge for seamless binary interaction.
-    
-- **Inference Engine:** Ollama (defaulting to `phi3` for speed or `llama3` for accuracy).
-    
-- **Prompt Management:** Jinja2 templates allow for dynamic "persona" switching (e.g., switching from "Malware Analyst" to "Vulnerability Researcher").
-    
-
-## 📖 Usage Examples
-
-### 1. Triage a suspicious binary
-
-```
-python cli.py analyze suspicious.exe --mode obfuscation --all-functions
+```text
+Binary file
+   │
+   ▼
+radare2 / r2pipe
+   │
+   ▼
+Function and import/string extraction
+   │
+   ▼
+Prompt construction (Jinja2)
+   │
+   ▼
+Local LLM (Ollama)
+   │
+   ▼
+Analyst-facing summary / triage output
 ```
 
-### 2. Explain a complex assembly function
+## Key capabilities
 
-```
-python cli.py analyze challenge.bin --function sym.decrypt_payload --mode explain
+- Function-level analysis using extracted disassembly and metadata
+- Full-binary triage through a disassembly pass
+- Support for analysis modes including:
+  - summarize
+  - obfuscation
+  - vuln_analysis
+- Local execution to keep analysis on the host machine
+- Streamlit-based GUI for easier interactive analysis
+
+## Repository structure
+
+```text
+.
+├── app/                  # Streamlit interface
+├── core/                 # Prompt and analysis orchestration
+├── llm/                  # LLM adapters
+├── prompts/              # Jinja templates for analysis modes
+├── static_analysis/      # radare2 extraction pipeline
+├── cli.py                # command-line entry point
+├── data_prep.py          # data preparation utilities
+├── build.sh              # system setup helper
+├── requirements.txt      # Python dependencies
+├── README.md             # project documentation
+└── bin_samples/         # sample binaries / artifacts
 ```
 
-_Developed by [0xIta3hi] for the security research community._
+## Requirements
+
+Before running NeuralRE, ensure the following are available:
+
+- Python 3.10 or newer
+- radare2
+- Ollama
+- pip for Python package installation
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd neuralre
+```
+
+2. Install Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Install radare2 if it is not already available on the system.
+
+On Arch-based systems, the project includes a helper script:
+
+```bash
+./build.sh
+```
+
+On Debian/Ubuntu systems, a typical install is:
+
+```bash
+sudo apt-get install radare2
+```
+
+4. Start Ollama locally and pull a model, for example:
+
+```bash
+ollama serve
+ollama pull phi3
+```
+
+## Usage
+
+The CLI entry point is `cli.py`.
+
+### Analyze a full binary
+
+```bash
+python cli.py --binary /path/to/binary --mode summarize --full
+```
+
+### Analyze a specific function
+
+```bash
+python cli.py --binary /path/to/binary --function 0 --mode obfuscation
+```
+
+You can also pass a function address in hexadecimal form:
+
+```bash
+python cli.py --binary /path/to/binary --function 0x401000 --mode vuln_analysis
+```
+
+### Available modes
+
+- summarize
+- obfuscation
+- vuln_analysis
+
+### Interactive GUI
+
+A Streamlit UI is available for manual binary upload and analysis:
+
+```bash
+streamlit run app/gui.py
+```
+
+## Example workflow
+
+1. Identify a suspicious binary.
+2. Run the extraction pipeline with radare2.
+3. Select a function or analyze the full disassembly.
+4. Submit the extracted assembly, imports, and strings to a local model.
+5. Review the model output as a triage aid rather than as a replacement for manual reverse engineering.
+
+## Notes and limitations
+
+- The output should be considered an analyst aid, not a definitive security verdict.
+- Model quality depends on the prompt structure, binary complexity, and the selected model.
+- Large or heavily obfuscated binaries may require targeted analysis on specific functions.
+- Local inference is helpful for privacy and control, but performance depends on the host environment.
+
+## License
+
+This project is distributed under the repository license. Please refer to the project files for the applicable terms.
+
+## Intended use
+
+NeuralRE is best suited for research, malware triage, CTF workflows, and exploratory reverse engineering. It is not designed as a black-box autonomous exploit system or a substitute for careful reverse engineering practice.
