@@ -3,6 +3,7 @@ import os
 
 def analyse_binary(filepath):
     r2 = r2pipe.open(filepath)
+    r2.cmd('e bin.relocs.apply=true')
     r2.cmd('aaa')  # analyze all
 
     functions = r2.cmdj('aflj')
@@ -16,16 +17,22 @@ def analyse_binary(filepath):
 
     results = []
 
-    for fn in functions:
+    for index, fn in enumerate(functions):
+        addr = None
+        if isinstance(fn, dict):
+            addr = fn.get('addr', fn.get('offset'))
+        if addr is None:
+            print(f'[!] Skipping function record {index}: missing address')
+            continue
+
         try:
-            addr = fn['offset']
             name = fn.get('name', f'func_{addr:x}')
             disasm = r2.cmdj(f'pdrj @ {addr}') or []
 
             fn_data = {
                 'name': name,
                 'address': hex(addr),
-                'size': fn['size'],
+                'size': fn.get('size', 0),
                 'disassembly': disasm,
                 'strings': [s for s in all_strings if 'string' in s],
                 'imports': [imp for imp in all_imports if 'name' in imp]
@@ -39,6 +46,7 @@ def analyse_binary(filepath):
 
 def extract_full_disassembly(filepath):
     r2 = r2pipe.open(filepath)
+    r2.cmd('e bin.relocs.apply=true')
     r2.cmd('aaa')
 
     disasm_json = r2.cmdj('pdj 5000') or []  # Disassemble 5000 instructions max
