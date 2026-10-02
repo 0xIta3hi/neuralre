@@ -1,20 +1,27 @@
-import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
+api_key = os.getenv("OPENROUTER_API_KEY")
 
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-2.0-flash-lite")
+client = OpenAI(
+    api_key=api_key,
+    base_url="https://openrouter.ai/api/v1",
+)
 
-def gemini_query(prompt):
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        return f"Error connecting to Gemini: {e}"
+completion = client.chat.completions.create(
+    model="openrouter/gpt-4o-mini",
+    messages=[
+        {"role":"system", "content": "you are a helpful assistant."},
+        {"role":"user", "content": "write a poem about the ocean."}
+    ]
+)
+print(completion.choices[0].message.content)
+
+
+
 
 
 
