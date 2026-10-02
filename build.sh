@@ -6,4 +6,4 @@ set -e
 echo "[~] Updating and installing dependencies..."
 pacman -Syu --noconfirm
 pacman -S radare2 --noconfirm
-echo "[✓] Radare2 installed successfully"
+echo "Radare2 installed successfully"
