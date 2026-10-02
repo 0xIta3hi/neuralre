@@ -3,6 +3,7 @@ import os
 from static_analysis.r2pipeline import analyse_binary, extract_full_disassembly
 from core.engine import prompt_builder
 from llm.ollama_runner import llm_query
+from llm.gemini import openrouter_client
 
 def list_fn(functions):
     print("[+] Available functions")
@@ -20,7 +21,6 @@ def main():
 
     print(f'[~] Analyzing binary: {args.binary}')
 
-    # ✅ FULL BINARY MODE
     if args.full:
         data = extract_full_disassembly(args.binary)
         print("[~] Running full binary analysis...")
@@ -40,14 +40,13 @@ def main():
         }
 
         prompt = prompt_builder(args.mode, context)
-        response = llm_query(prompt, model=args.model)
+        response = openrouter_client(prompt, model=args.model)
 
         print("[ ! ] LLM response: \n" + "="*40)
         print(response)
         print("="*40)
         return
 
-    # ✅ FUNCTION MODE
     functions = analyse_binary(args.binary)
     if not functions:
         print("[X] No functions found")

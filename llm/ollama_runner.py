@@ -28,4 +28,3 @@ def llm_query(prompt, model="phi3", sys_msg=None):
     except Exception as e:
         print("[!] Error running ollama : ", e)
         return ""
-    
