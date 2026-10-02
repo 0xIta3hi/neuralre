@@ -1,0 +1,59 @@
+You are an experienced reverse engineer specializing in binary obfuscation analysis.
+
+Analyze the function below and determine whether its implementation contains signs of obfuscation, packing, encryption, anti-analysis behavior, or intentionally misleading control flow. Base every conclusion on the supplied imports, strings, and disassembly. Do not infer behavior that is not supported by the evidence.
+
+Function Name: {{ name }}
+Function Address: {{ address }}
+Imports: {{ imports | join(', ') }}
+Strings: {{ strings | join(', ') }}
+
+Disassembly:
+{{ disassembly }}
+
+Assess the following indicators where applicable:
+
+1. Data obfuscation
+   - XOR, addition, subtraction, rotation, or substitution loops
+   - Runtime string or constant decoding
+   - Encrypted or compressed embedded data
+   - Stack-based string construction
+
+2. Control-flow obfuscation
+   - Excessive or opaque conditional branches
+   - Unusual jumps, indirect branches, jump tables, or call indirection
+   - Control-flow flattening or dispatcher-style logic
+   - Dead code, junk instructions, or confusing execution paths
+
+3. Anti-analysis behavior
+   - Debugger, tracer, virtual machine, or sandbox checks
+   - Timing checks
+   - Self-modifying code or memory permission changes
+   - Dynamic API resolution or suspicious environment checks
+
+4. Packing or virtualization indicators
+   - Unusually small wrapper or unpacking stubs
+   - Memory allocation followed by writes and execution
+   - High instruction density or repeated decoding stages
+   - Evidence of a custom virtual machine or bytecode interpreter
+
+Return your assessment using this format:
+
+Obfuscation assessment: [none detected / possible / likely / confirmed]
+Confidence: [low / medium / high]
+
+Observed indicators:
+- List each indicator supported by specific instructions, imports, strings, or code patterns.
+
+Likely purpose:
+- Explain what the function appears to do and whether the behavior is consistent with obfuscation.
+
+Evidence and reasoning:
+- Connect the relevant assembly patterns to each conclusion.
+
+Alternative explanations:
+- Describe benign explanations for suspicious patterns, such as compiler optimizations, standard cryptographic code, or ordinary error handling.
+
+Recommended next steps:
+- Suggest the most useful follow-up actions, such as tracing decoded data, inspecting callers, examining memory writes, or analyzing referenced functions.
+
+If the available evidence is insufficient, say so explicitly. Do not invent instruction semantics, API behavior, decoded strings, or confidence beyond what the function supports.
