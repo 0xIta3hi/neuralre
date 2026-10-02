@@ -3,5 +3,6 @@ jinja2
 google-generativeai
 python-dotenv
 r2pipe
+openai
 
 

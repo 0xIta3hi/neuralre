@@ -2,7 +2,6 @@ import argparse
 import os
 from static_analysis.r2pipeline import analyse_binary, extract_full_disassembly
 from core.engine import prompt_builder
-from llm.ollama_runner import llm_query
 from llm.gemini import openrouter_client
 
 def list_fn(functions):
@@ -15,7 +14,7 @@ def main():
     parser.add_argument('--binary', '-b', required=True, help='path to the binary file')
     parser.add_argument('--function', '-f', help='Function index or address to analyze (optional)')
     parser.add_argument('--mode', '-m' , default="summarize", choices=['summarize', 'obfuscation', 'vuln_analysis'], help='analysis mode')
-    parser.add_argument('--model', default="phi3", help='Model name in ollama ( default: phi3 )')
+    parser.add_argument('--model', default="openai/gpt-4o-mini", help='OpenRouter model ID')
     parser.add_argument('--full', action='store_true', help="Analyse full binary instead of a single function")
     args = parser.parse_args()
 
@@ -71,7 +70,7 @@ def main():
 
     print(f"\n[~] Analyzing function {fn['name']} @ {fn['address']} with mode: {args.mode}")
     prompt = prompt_builder(args.mode, fn)
-    response = llm_query(prompt, model=args.model)
+    response = openrouter_client(prompt, model=args.model)
 
     print("[ ! ] LLM response: \n" + "="*40)
     print(response)

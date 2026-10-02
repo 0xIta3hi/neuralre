@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from static_analysis.r2pipeline import analyse_binary
 from core.engine import prompt_builder
-from llm.gemini import gemini_query
+from llm.gemini import openrouter_client
 
 st.set_page_config(page_title="RE-LLM - Reverse Engineering Assistant")
 
@@ -40,10 +40,10 @@ if uploaded_file:
             language="asm"
         )
 
-        if st.button("🧠 Analyze with Gemini"):
+        if st.button("Analyze with OpenRouter"):
             prompt = prompt_builder(mode, fn)
-            with st.spinner("Sending to Gemini..."):
-                response = gemini_query(prompt)
+            with st.spinner("Sending to OpenRouter..."):
+                response = openrouter_client(prompt)
 
-            st.subheader("🧠 Gemini Output")
+            st.subheader("OpenRouter Output")
             st.markdown(response)

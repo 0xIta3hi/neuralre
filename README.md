@@ -1,10 +1,10 @@
 # NeuralRE
 
-AI-assisted reverse engineering for binary analysis using radare2 and local large language models.
+AI-assisted reverse engineering for binary analysis using radare2 and OpenRouter-hosted language models.
 
 ## Overview
 
-NeuralRE is a lightweight reverse engineering workflow that combines static analysis with language-model reasoning to help security researchers triage unfamiliar binaries. The project extracts function metadata and disassembly from a binary, structures the result into prompt-ready context, and submits it to a locally hosted model for analysis.
+NeuralRE is a lightweight reverse engineering workflow that combines static analysis with language-model reasoning to help security researchers triage unfamiliar binaries. The project extracts function metadata and disassembly from a binary, structures the result into prompt-ready context, and submits it to an OpenRouter model for analysis.
 
 This is designed to support common reverse engineering tasks such as:
 
@@ -25,7 +25,7 @@ The project is intentionally simple and modular:
 - radare2 for binary analysis and disassembly
 - r2pipe for Python integration
 - Jinja-based prompt templates for structured analysis prompts
-- Ollama for local inference
+- OpenRouter for model inference
 - optional Streamlit interface for interactive use
 
 ```text
@@ -41,7 +41,7 @@ Function and import/string extraction
 Prompt construction (Jinja2)
    │
    ▼
-Local LLM (Ollama)
+OpenRouter model
    │
    ▼
 Analyst-facing summary / triage output
@@ -55,7 +55,7 @@ Analyst-facing summary / triage output
   - summarize
   - obfuscation
   - vuln_analysis
-- Local execution to keep analysis on the host machine
+- Configurable model selection through the OpenRouter API
 - Streamlit-based GUI for easier interactive analysis
 
 ## Repository structure
@@ -81,7 +81,7 @@ Before running NeuralRE, ensure the following are available:
 
 - Python 3.10 or newer
 - radare2
-- Ollama
+- An OpenRouter API key
 - pip for Python package installation
 
 ## Installation
@@ -113,11 +113,16 @@ On Debian/Ubuntu systems, a typical install is:
 sudo apt-get install radare2
 ```
 
-4. Start Ollama locally and pull a model, for example:
+4. Set your OpenRouter API key:
 
 ```bash
-ollama serve
-ollama pull phi3
+export OPENROUTER_API_KEY="your_api_key_here"
+```
+
+Alternatively, place the key in a local `.env` file:
+
+```text
+OPENROUTER_API_KEY=your_api_key_here
 ```
 
 ## Usage
@@ -161,7 +166,7 @@ streamlit run app/gui.py
 1. Identify a suspicious binary.
 2. Run the extraction pipeline with radare2.
 3. Select a function or analyze the full disassembly.
-4. Submit the extracted assembly, imports, and strings to a local model.
+4. Submit the extracted assembly, imports, and strings to an OpenRouter model.
 5. Review the model output as a triage aid rather than as a replacement for manual reverse engineering.
 
 ## Notes and limitations
